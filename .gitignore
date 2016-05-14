@@ -1,0 +1,10 @@
+.name
+out/*
+compiler.xml
+profiles_settings.xml
+encodings.xml
+misc.xml
+modules.xml
+vcs.xml
+workspace.xml
+luatips.iml
