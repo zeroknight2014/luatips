@@ -86,3 +86,89 @@ table.foreach(t, function(i, v) print(i, v) end)
 ```lua
 table.foreachi(t, function(i, v) print(i, v) end)
 ```
+
+
+# 2016/5/18 lua中异常处理
+--1.捕获异常，使用pcall函数，返回值：第一个为true/false; 第二个为错误信息
+```lua
+function run()
+   -- run code
+end
+
+--形式1
+local result, error_return = pcall(run);
+--形式2，采用匿名函数方式
+local result, error_return = pcall(function () return run(); end);
+```
+
+--2.捕获异常，使用xpcall(f, err)函数
+--参数：1为要运行的保护函数; 2为错误信息处理函数
+--返回值：1为true/false; 2为err参数对应函数的返回值
+```lua
+function run()
+   -- run code
+   error({})
+end
+
+function err_handle(code)
+   -- deal error code 
+end
+
+local result, err_return = xpcall(run, err_handle);
+```
+
+--主动抛出异常，使用error()函数，error的参数为抛出的错误内容，可以是table
+```lua
+error("run failed.");
+error({code=911});
+...
+print(error_return.code) --911
+```
+
+# 2016/5/19 lua中的抽象和继承
+lua中没有类的概念，但是有别的方式实现抽象和继承
+### 抽象，封装对象，包括属性和方法，使用table来实现
+原理：函数是lua中的一等公民，可以和值一样进行赋值，传递
+```lua
+local people = {
+sex = "",
+name = "";
+};
+
+function people.sleep()  --等同于 people.sleep = function () ... end;
+end
+
+function people.eat()
+end
+
+function people.work()
+end
+
+function people.play()
+end
+...
+```
+
+### 继承，方法的继承和重写
+实现原理：在table中查找对应的键值，若不存在，就到table对应的元表中的__index值对应的去表中去查找对应的键值，找到了就返回
+```lua
+--定义原型
+local people = {}
+
+--定义类对象的创建方法
+function people:new(o)
+  o = o or {};
+  setmetatable(o, self); --将people设置为实例对象的元表
+  self.__index = self;   --将people的__index指向people自己
+  return o;
+end
+
+--man可以看作是people的一个实例对象
+--也可以看做是man类的原型，继承自people
+local man = people:new();
+
+--重写people的play函数
+function man:play()
+end
+
+```
