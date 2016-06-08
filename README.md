@@ -172,3 +172,35 @@ function man:play()
 end
 
 ```
+
+
+# 2016/06/08 lua中的table转json
+一个函数简单搞定
+```lua
+function tableToJson(t)
+  local function transform(tmp)
+    local tb = {}
+    for k, v in pairs(tmp) do
+      local k_type = type(k)
+      local v_type = type(v)
+      local key = (k_type == "string" and '"' .. k .. '":') or (k_type == "number" and "")
+      local value = (v_type == "table" and transform(v))
+          or (v_type == "string" and '"' .. v .. '"')
+          or (v_type == "boolean" and tostring(v))
+          or (v_type == "number" and v)
+
+      tb[#tb + 1] =  tostring(key) .. tostring(value)
+    end
+    if table.maxn(tmp) == 0 then
+      return "{" .. table.concat(tb, ',') .. "}"
+    else
+      return "[" .. table.concat(tb, ',') .. "]"
+    end
+  end
+
+  if t == nil then
+    return nil
+  end
+  return transform(t)
+end
+```
